@@ -151,7 +151,10 @@ Amnesiac (ttyd0)
 login:
 ```
 
-To disconnect from the console, press Ctrl + ]. 
+To disconnect from the console, press Ctrl + ].
+```
+press Ctrl + ]
+```
 
 Connect to the VM console using the virsh console vrr-vm-name command.
 ```
