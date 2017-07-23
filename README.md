@@ -20,7 +20,7 @@ vMX.ova images
 
 ### Installing
 
-####Part1: KVM installation and preparation
+#### Part1: KVM installation and preparation
 
 At this point CentOS Server has been freshly installed, and the option to install virtualisation was selected during setup.
 
@@ -55,12 +55,14 @@ yum install -y qemu-kvm qemu-img
 ```
 
 Now, you have the minimum requirement to deploy virtual platform on your host, but we also still have useful tools to administrate our platform such as:
-
+```
 virt-manager provides a GUI tool to administrate your virtual machines.
 libvirt-client provides a CL tool to administrate your virtual environment this tool called virsh.
 virt-install provides the command “virt-install” to create your virtual machines from CLI.
 libvirt provides the server and host side libraries for interacting with hypervisors and host systems.
 Let’s install these above tools using the following command.
+```
+
 ```
 yum install -y virt-manager libvirt libvirt-python libvirt-client 
 ```
@@ -82,89 +84,87 @@ systemctl status libvirtd
 
 Now, lets switch to the next section to create our virtual machines.
 
+#### Part2: Converting OVA for use with KVM / QCOW2
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+The OVA file is nothing more than a TAR archive, containing the .OVF and .VMDK files. Easy!
 ```
-sudo yum update
-yum -y install qemu-kvm libvirt virt-install bridge-utils
-
+file vMX.ova
 ```
 
-And repeat
-
+I'ts possible to use the tar command to list the contents
 ```
-until finished
-```
-
-End with an example of getting some data out of the system or using it for a little demo
-
-## Running the tests
-
-Explain how to run the automated tests for this system
-
-### Break down into end to end tests
-
-Explain what these tests test and why
-
-```
-Give an example
+tar -tf vMX.ova 
 ```
 
-### And coding style tests
-
-Explain what these tests test and why
-
+Simply extract those things...
 ```
-Give an example
+tar -xvf vMX.ova 
 ```
 
-## Deployment
+Now take a look at the created files The OVF XML file describes the image, it makes for some interesting reading about the expectations of the running environment.
+```
+file vMX* 
+```
 
-Add additional notes about how to deploy this on a live system
+Recent versions of qemu are able to run directly from the VMDK file, buy why do that? Use QCOW2, it's better. Execute: qemu-img -h and the last line of output shows the supported formats.
+```
+qemu-img -h |tail -n1
+```
 
-## Built With
+Supported formats: raw cow qcow vdi vmdk cloop dmg bochs vpc vvfat qcow2 parallels nbd blkdebug sheepdog host_cdrom host_floppy host_device file
+Now actually convert it, this may take some time.
+```
+qemu-img convert -O qcow2 vMX.vmdk vMX.qcow2
+```
 
-* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - The web framework used
-* [Maven](https://maven.apache.org/) - Dependency Management
-* [ROME](https://rometools.github.io/rome/) - Used to generate RSS Feeds
+#### Part3: Create vMX VM using KVM
+Copy the vRR image to the libvirt directory and rename it with the name of your VM
+```
+cp vMX.qcow2 /var/lib/libvirt/images/vMX.qcow2
+```
 
-## Contributing
+Install the vRR VM using the virt-install command. You must specify the VM name, memory, and image location. The amount of memory depends on your deployment.
+```
+virt-install 	--name vMX-VM1 \
+				--ram 1024 \
+				--disk path=/var/lib/libvirt/images/vMX-VM1.qcow2 \
+				--cpu host --vcpus 2 \
+				--os-variant none \
+				--graphics none \
+				--import \
+				--network bridge=bridge1,mac=00:05:86:71:92:08,model=e1000 \
+				--network network=lan1,mac=00:05:86:71:92:09,model=e1000 \
+				--network network=lan2,mac=00:05:86:71:92:00,model=e1000 \
+				--network network=lan2,mac=00:05:86:71:92:01,model=e1000 \
+				--network network=lan3,mac=00:05:86:71:92:02,model=e1000 \
+				--network network=lan3,mac=00:05:86:71:92:03,model=e1000 \
+				--network network=lan4,mac=00:05:86:71:92:04,model=e1000 \
+				--network network=lan4,mac=00:05:86:71:92:05,model=e1000 \
+				--network network=lan5,mac=00:05:86:71:92:06,model=e1000 \
+				--network network=lan5,mac=00:05:86:71:92:07,model=e1000 
+```
 
-Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
+When the installation is completed, the login prompt appears:
+```
+Amnesiac (ttyd0)
 
-## Versioning
+login:
+```
 
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags). 
+To disconnect from the console, press Ctrl + ]. 
 
-## Authors
+Connect to the VM console using the virsh console vrr-vm-name command.
+```
+virsh console vMX-VM1
+```
 
-* **Billie Thompson** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
+Log in from the console with the username root and password root123. Type cli to access the Junos OS CLI.
 
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
+Verify that your VM is installed using the show interfaces terse command. The added interfaces appear as em interfaces.
 
-## License
+## Source
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
-
-## Acknowledgments
-
-* Hat tip to anyone who's code was used
-* Inspiration
+* Juniper officer website
+* matt.dinham.net
 * etc
 
