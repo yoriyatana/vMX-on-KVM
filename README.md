@@ -118,12 +118,12 @@ qemu-img convert -O qcow2 vMX.vmdk vMX.qcow2
 ```
 
 #### Part3: Create vMX VM using KVM
-Copy the vRR image to the libvirt directory and rename it with the name of your VM
+Copy the vMX image to the libvirt directory and rename it with the name of your VM
 ```
 cp vMX.qcow2 /var/lib/libvirt/images/vMX.qcow2
 ```
 
-Install the vRR VM using the virt-install command. You must specify the VM name, memory, and image location. The amount of memory depends on your deployment.
+Install the vMX VM using the virt-install command. You must specify the VM name, memory, and image location. The amount of memory depends on your deployment.
 ```
 virt-install 	--name vMX-VM1 \
 				--ram 1024 \
@@ -156,7 +156,7 @@ To disconnect from the console, press Ctrl + ].
 press Ctrl + ]
 ```
 
-Connect to the VM console using the virsh console vrr-vm-name command.
+Connect to the VM console using the virsh console vm-name command.
 ```
 virsh console vMX-VM1
 ```
@@ -169,5 +169,5 @@ Verify that your VM is installed using the show interfaces terse command. The ad
 
 * Juniper official website
 * matt.dinham.net
-* etc
+* techmint.com
 
