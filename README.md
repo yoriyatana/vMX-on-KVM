@@ -167,7 +167,7 @@ Verify that your VM is installed using the show interfaces terse command. The ad
 
 ## Source
 
-* Juniper officer website
+* Juniper official website
 * matt.dinham.net
 * etc
 
